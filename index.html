@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTION — Hall of Fame</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020306;--surface:#060a10;--card:#08111e;--border:#0c1e35;--border2:#102844;
+  --blue:#1565ff;--blue-l:#4d8bff;
+  --gold:#f0c040;--silver:#b8cce0;--bronze:#c87941;
+  --white:#eaf2ff;--text:#b8d4f0;--muted:#3a5570;
+  --success:#22d98a;--danger:#ff3a5c;--orange:#ff7a2f;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* starfield bg */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,.1) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.12) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,.08) 0%, transparent 100%),
+    radial-gradient(2px 2px at 70% 45%, rgba(240,192,64,.2) 0%, transparent 100%);
+}
+body::after{content:'';position:fixed;top:-400px;left:50%;transform:translateX(-50%);width:1200px;height:800px;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(240,192,64,.06) 0%,transparent 65%);}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 36px;height:58px;
+  background:rgba(2,3,6,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:8px;color:var(--white);}
+.logo span{color:var(--gold);}
+.nav-tag{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);}
+
+/* SEASON TABS */
+.season-nav{position:relative;z-index:10;display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;}
+.s-tab{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;padding:14px 28px;cursor:pointer;
+  color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;}
+.s-tab:hover{color:var(--text);}
+.s-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* HERO */
+.hero{position:relative;z-index:10;padding:64px 40px 52px;text-align:center;border-bottom:1px solid var(--border);}
+.hero-crown{font-size:56px;margin-bottom:12px;display:block;animation:bob 3s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,10vw,120px);letter-spacing:10px;
+  color:var(--white);line-height:.9;text-shadow:0 0 80px rgba(240,192,64,.3);opacity:0;animation:up .6s .1s forwards;}
+.hero-title span{color:var(--gold);text-shadow:0 0 40px rgba(240,192,64,.6);}
+.hero-sub{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:5px;color:var(--muted);
+  margin-top:14px;opacity:0;animation:up .6s .25s forwards;}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* SEASON PANELS */
+.season-panel{display:none;position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:44px 24px 80px;}
+.season-panel.active{display:block;}
+
+/* CHAMPION SHOWCASE */
+.champion-showcase{display:grid;grid-template-columns:1fr 320px;gap:2px;margin-bottom:2px;align-items:stretch;}
+.champ-main{background:linear-gradient(135deg,#120e00,#0a0800,#120e00);border:1px solid var(--gold);
+  padding:40px;position:relative;overflow:hidden;}
+.champ-main::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.champ-main::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(240,192,64,.4),transparent);}
+.champ-bg-text{position:absolute;bottom:-20px;right:-10px;font-family:'Bebas Neue',sans-serif;
+  font-size:140px;color:rgba(240,192,64,.04);letter-spacing:-5px;pointer-events:none;line-height:1;}
+.champ-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:5px;color:rgba(240,192,64,.6);margin-bottom:12px;}
+.champ-trophy{font-size:40px;margin-bottom:8px;display:block;}
+.champ-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);letter-spacing:4px;
+  color:var(--gold);line-height:1;text-shadow:0 0 40px rgba(240,192,64,.4);margin-bottom:4px;}
+.champ-sub{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:rgba(240,192,64,.6);margin-bottom:24px;}
+.champ-stats{display:flex;gap:24px;}
+.cs-item{text-align:center;}
+.cs-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1;}
+.cs-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:2px;}
+
+.champ-sidebar{display:flex;flex-direction:column;gap:2px;}
+.sidebar-card{background:var(--card);border:1px solid var(--border);padding:20px;flex:1;}
+.sc-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);margin-bottom:10px;}
+.sc-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:2px;}
+.sc-detail{font-size:13px;color:var(--muted);font-weight:300;}
+.mvp-card{border-color:rgba(21,101,255,.3);}
+.mvp-card .sc-name{color:var(--blue-l);}
+.runner-card{border-color:rgba(184,204,224,.2);}
+.runner-card .sc-name{color:var(--silver);}
+
+/* TOURNAMENT ARCHIVE */
+.archive-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--blue-l);
+  margin:36px 0 16px;display:flex;align-items:center;gap:10px;}
+.archive-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.tournament-list{display:flex;flex-direction:column;gap:2px;}
+.tourney-card{background:var(--card);border:1px solid var(--border);overflow:hidden;
+  cursor:pointer;transition:border-color .2s;}
+.tourney-card:hover{border-color:var(--border2);}
+.tourney-card.expanded{border-color:var(--blue);}
+.tourney-header{display:flex;align-items:center;gap:16px;padding:16px 20px;}
+.tourney-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--border2);line-height:1;width:32px;flex-shrink:0;}
+.tourney-info{flex:1;}
+.tourney-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--white);margin-bottom:2px;}
+.tourney-date{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+.tourney-fmt{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid var(--border2);color:var(--muted);}
+.tourney-winner{text-align:right;}
+.tw-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:2px;}
+.tw-name{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);letter-spacing:1px;}
+.tourney-expand{color:var(--muted);font-size:18px;transition:transform .2s;flex-shrink:0;margin-left:8px;}
+.tourney-card.expanded .tourney-expand{transform:rotate(180deg);}
+
+.tourney-details{display:none;padding:0 20px 20px;border-top:1px solid var(--border);}
+.tourney-card.expanded .tourney-details{display:block;}
+.td-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:16px;}
+.td-cell{background:var(--surface);padding:14px;text-align:center;}
+.tdc-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);}
+.tdc-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-top:2px;}
+.td-standings{margin-top:16px;}
+.stand-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);margin-bottom:2px;background:var(--surface);}
+.stand-place{font-family:'Bebas Neue',sans-serif;font-size:22px;width:28px;flex-shrink:0;}
+.stand-place.p1{color:var(--gold);}
+.stand-place.p2{color:var(--silver);}
+.stand-place.p3{color:var(--bronze);}
+.stand-name{font-weight:700;color:var(--white);font-size:15px;flex:1;}
+.stand-detail{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
+
+/* MVP LEADERBOARD */
+.mvp-section{margin-top:2px;}
+.mvp-podium{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:2px;align-items:end;}
+.mvp-card-p{background:var(--card);border:1px solid var(--border);padding:20px 14px;text-align:center;position:relative;overflow:hidden;}
+.mvp-card-p::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.mvp-p1{border-color:var(--gold);background:linear-gradient(160deg,#120e00,var(--card));}
+.mvp-p1::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.mvp-p2::before{background:linear-gradient(90deg,transparent,var(--silver),transparent);}
+.mvp-p3::before{background:linear-gradient(90deg,transparent,var(--bronze),transparent);}
+.mvp-medal{font-size:20px;margin-bottom:4px;display:block;}
+.mvp-place{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;}
+.mvp-p1 .mvp-place{color:var(--gold);}
+.mvp-p2 .mvp-place{color:var(--silver);}
+.mvp-p3 .mvp-place{color:var(--bronze);}
+.mvp-player{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--white);margin-bottom:2px;}
+.mvp-team{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:10px;letter-spacing:1px;}
+.mvp-stat{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;}
+.mvp-p1 .mvp-stat{color:var(--gold);}
+.mvp-p2 .mvp-stat{color:var(--silver);}
+.mvp-p3 .mvp-stat{color:var(--bronze);}
+.mvp-stat-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-top:2px;}
+
+/* CLIPS */
+.clips-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:2px;}
+.clip-card{background:var(--card);border:1px solid var(--border);padding:0;overflow:hidden;
+  cursor:pointer;transition:border-color .2s;position:relative;}
+.clip-card:hover{border-color:var(--blue-l);}
+.clip-thumb{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#0a1525,#050d1a);
+  display:flex;align-items:center;justify-content:center;position:relative;}
+.clip-play{font-size:36px;opacity:.6;transition:opacity .2s;}
+.clip-card:hover .clip-play{opacity:1;}
+.clip-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px;
+  background:linear-gradient(transparent,rgba(1,3,6,.9));}
+.clip-player{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--white);}
+.clip-desc{font-size:11px;color:var(--muted);font-weight:300;}
+.clip-info{padding:12px 14px;border-top:1px solid var(--border);}
+.clip-title{font-weight:700;font-size:14px;color:var(--text);margin-bottom:2px;}
+.clip-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
+
+/* VIDEO MODAL */
+.vid-overlay{position:fixed;inset:0;background:rgba(1,2,4,.94);z-index:500;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(12px);}
+.vid-overlay.open{opacity:1;pointer-events:all;}
+.vid-modal{width:100%;max-width:860px;position:relative;transform:scale(.95);transition:transform .25s;}
+.vid-overlay.open .vid-modal{transform:scale(1);}
+.vid-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:16px;}
+.vid-title-wrap{flex:1;min-width:0;}
+.vid-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--white);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vid-meta{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:2px;}
+.vid-close{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:var(--muted);background:none;border:1px solid var(--border);padding:7px 14px;
+  cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.vid-close:hover{border-color:var(--danger);color:var(--danger);}
+.vid-player{width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--border);position:relative;}
+.vid-player video{width:100%;height:100%;display:block;}
+.vid-player iframe{width:100%;height:100%;border:none;display:block;}
+.vid-player .vid-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  background:var(--card);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;}
+.vid-hint{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--muted);text-align:center;margin-top:8px;}
+.vid-hint a{color:var(--blue-l);}
+
+/* Clip card hover glow */
+.clip-card{cursor:pointer;}
+.clip-thumb{background:linear-gradient(135deg,#0a1525,#050d1a);}
+.clip-type-badge{position:absolute;top:8px;right:8px;font-family:'Share Tech Mono',monospace;
+  font-size:8px;letter-spacing:1px;padding:2px 7px;border:1px solid;}
+.clip-type-mp4{color:var(--blue-l);border-color:rgba(77,139,255,.5);background:rgba(77,139,255,.1);}
+.clip-type-yt{color:var(--danger);border-color:rgba(255,58,92,.5);background:rgba(255,58,92,.1);}
+
+/* EMPTY STATE */
+.empty-season{text-align:center;padding:80px 24px;border:1px solid var(--border);background:var(--card);}
+.es-icon{font-size:48px;margin-bottom:16px;display:block;opacity:.4;}
+.es-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:var(--border2);margin-bottom:8px;}
+.es-sub{font-size:14px;color:var(--muted);font-weight:300;line-height:1.6;max-width:400px;margin:0 auto;}
+
+/* ADMIN NOTE */
+.admin-note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--blue-l);
+  padding:14px 18px;margin-bottom:24px;font-size:13px;color:var(--muted);line-height:1.7;}
+.admin-note strong{color:var(--blue-l);}
+.admin-note code{font-family:'Share Tech Mono',monospace;font-size:11px;background:rgba(21,101,255,.1);
+  border:1px solid var(--border);color:var(--blue-l);padding:1px 6px;}
+
+@media(max-width:768px){
+  .champion-showcase{grid-template-columns:1fr;}
+  .mvp-podium{grid-template-columns:1fr;}
+  .clips-grid{grid-template-columns:1fr;}
+  .td-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">MOTI<span>ON</span></div>
+  <div class="nav-tag">// HALL OF FAME</div>
+</nav>
+
+<!-- SEASON TABS -->
+<div class="season-nav">
+  <button class="s-tab active" onclick="showSeason('s1',this)">SEASON 1</button>
+  <button class="s-tab" onclick="showSeason('s2',this)">SEASON 2</button>
+  <button class="s-tab" onclick="showSeason('s3',this)">SEASON 3</button>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-crown">🏆</span>
+  <div class="hero-title">HALL OF <span>FAME</span></div>
+  <div class="hero-sub">// MOTION ROCKET LEAGUE · SEASON ARCHIVE · CHAMPIONS & LEGENDS</div>
+</div>
+
+<!-- ══ SEASON 1 ════════════════════════════════════════ -->
+<div class="season-panel active" id="panel-s1">
+
+  <div class="admin-note">
+    <strong>Admin — How to update this page:</strong> Open the file in Notepad. Find the Season 1 section. Replace placeholder names/stats with real data after each tournament. To add a new season, duplicate the season panel block and add a new tab button. Upload to GitHub → live in 60 seconds. Clip links: paste the direct video URL into the <code>clip-url</code> attribute on each clip card.
+  </div>
+
+  <!-- CHAMPION SHOWCASE -->
+  <div class="champion-showcase">
+    <div class="champ-main">
+      <div class="champ-bg-text">S1</div>
+      <div class="champ-eyebrow">⚡ SEASON 1 · GRAND CHAMPION</div>
+      <span class="champ-trophy">🏆</span>
+      <div class="champ-name">TEAM NAME</div>
+      <div class="champ-sub">SEASON 1 · 3V3 FORMAT · [TOURNAMENT DATE]</div>
+      <div class="champ-stats">
+        <div class="cs-item"><div class="cs-val">W-L</div><div class="cs-lbl">RECORD</div></div>
+        <div class="cs-item"><div class="cs-val">0</div><div class="cs-lbl">TOURNAMENTS</div></div>
+        <div class="cs-item"><div class="cs-val">0</div><div class="cs-lbl">GOALS SCORED</div></div>
+      </div>
+    </div>
+    <div class="champ-sidebar">
+      <div class="sidebar-card mvp-card">
+        <div class="sc-label">⚡ SEASON MVP</div>
+        <div class="sc-name">PLAYER NAME</div>
+        <div class="sc-detail">Team · Strength Rating: 00</div>
+        <div class="sc-detail" style="margin-top:4px;">Goals: 0 · Shot%: 0% · Score/GM: 0</div>
+      </div>
+      <div class="sidebar-card runner-card">
+        <div class="sc-label">🥈 SEASON RUNNER-UP</div>
+        <div class="sc-name">TEAM NAME</div>
+        <div class="sc-detail">Lost in Grand Finals</div>
+      </div>
+      <div class="sidebar-card" style="border-color:rgba(200,121,65,.3);">
+        <div class="sc-label">🥉 THIRD PLACE</div>
+        <div class="sc-name">TEAM NAME</div>
+        <div class="sc-detail">Third place finish</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOURNAMENT ARCHIVE -->
+  <div class="archive-title">📋 TOURNAMENT ARCHIVE</div>
+
+  <div class="tournament-list">
+
+    <div class="tourney-card" onclick="toggleTourney(this)">
+      <div class="tourney-header">
+        <div class="tourney-num">T1</div>
+        <div class="tourney-info">
+          <div class="tourney-name">Motion Season 1 — Opening Cup</div>
+          <div class="tourney-date">DATE · FORMAT · TEAMS ENTERED</div>
+        </div>
+        <span class="tourney-fmt">3V3</span>
+        <div class="tourney-winner">
+          <div class="tw-label">WINNER</div>
+          <div class="tw-name">Team Name</div>
+        </div>
+        <div class="tourney-expand">▾</div>
+      </div>
+      <div class="tourney-details">
+        <div class="td-grid">
+          <div class="td-cell"><div class="tdc-val">0</div><div class="tdc-lbl">TEAMS</div></div>
+          <div class="td-cell"><div class="tdc-val">0</div><div class="tdc-lbl">MATCHES PLAYED</div></div>
+          <div class="td-cell"><div class="tdc-val">Player</div><div class="tdc-lbl">MVP</div></div>
+        </div>
+        <div class="td-standings" style="margin-top:14px;">
+          <div class="stand-row"><span class="stand-place p1">🥇</span><span class="stand-name">Team Name</span><span class="stand-detail">CHAMPION</span></div>
+          <div class="stand-row"><span class="stand-place p2">🥈</span><span class="stand-name">Team Name</span><span class="stand-detail">RUNNER-UP</span></div>
+          <div class="stand-row"><span class="stand-place p3">🥉</span><span class="stand-name">Team Name</span><span class="stand-detail">THIRD PLACE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tourney-card" onclick="toggleTourney(this)">
+      <div class="tourney-header">
+        <div class="tourney-num">T2</div>
+        <div class="tourney-info">
+          <div class="tourney-name">Motion Season 1 — 2v2 Cup</div>
+          <div class="tourney-date">DATE · 2V2 FORMAT · TEAMS ENTERED</div>
+        </div>
+        <span class="tourney-fmt">2V2</span>
+        <div class="tourney-winner">
+          <div class="tw-label">WINNER</div>
+          <div class="tw-name">Team Name</div>
+        </div>
+        <div class="tourney-expand">▾</div>
+      </div>
+      <div class="tourney-details">
+        <div class="td-grid">
+          <div class="td-cell"><div class="tdc-val">0</div><div class="tdc-lbl">TEAMS</div></div>
+          <div class="td-cell"><div class="tdc-val">0</div><div class="tdc-lbl">MATCHES PLAYED</div></div>
+          <div class="td-cell"><div class="tdc-val">Player</div><div class="tdc-lbl">MVP</div></div>
+        </div>
+        <div class="td-standings" style="margin-top:14px;">
+          <div class="stand-row"><span class="stand-place p1">🥇</span><span class="stand-name">Team Name</span><span class="stand-detail">CHAMPION</span></div>
+          <div class="stand-row"><span class="stand-place p2">🥈</span><span class="stand-name">Team Name</span><span class="stand-detail">RUNNER-UP</span></div>
+          <div class="stand-row"><span class="stand-place p3">🥉</span><span class="stand-name">Team Name</span><span class="stand-detail">THIRD PLACE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tourney-card" onclick="toggleTourney(this)">
+      <div class="tourney-header">
+        <div class="tourney-num">T3</div>
+        <div class="tourney-info">
+          <div class="tourney-name">Motion Season 1 — Grand Finals</div>
+          <div class="tourney-date">DATE · 3V3 DOUBLE ELIM · SEASON FINALE</div>
+        </div>
+        <span class="tourney-fmt" style="border-color:rgba(240,192,64,.4);color:var(--gold);">FINALS</span>
+        <div class="tourney-winner">
+          <div class="tw-label">WINNER</div>
+          <div class="tw-name">Team Name</div>
+        </div>
+        <div class="tourney-expand">▾</div>
+      </div>
+      <div class="tourney-details">
+        <div class="td-grid">
+          <div class="td-cell"><div class="tdc-val">0</div><div class="tdc-lbl">TEAMS</div></div>
+          <div class="td-cell"><div class="tdc-val">0</div><div class="tdc-lbl">MATCHES PLAYED</div></div>
+          <div class="td-cell"><div class="tdc-val">Player</div><div class="tdc-lbl">SEASON MVP</div></div>
+        </div>
+        <div class="td-standings" style="margin-top:14px;">
+          <div class="stand-row"><span class="stand-place p1">🥇</span><span class="stand-name">Team Name</span><span class="stand-detail">SEASON CHAMPION</span></div>
+          <div class="stand-row"><span class="stand-place p2">🥈</span><span class="stand-name">Team Name</span><span class="stand-detail">RUNNER-UP</span></div>
+          <div class="stand-row"><span class="stand-place p3">🥉</span><span class="stand-name">Team Name</span><span class="stand-detail">THIRD PLACE</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SEASON MVP LEADERBOARD -->
+  <div class="archive-title" style="margin-top:36px;">⚡ SEASON MVP STATS</div>
+  <div class="mvp-podium" style="margin-bottom:2px;">
+    <div class="mvp-card-p mvp-p2">
+      <span class="mvp-medal">🥈</span>
+      <div class="mvp-place">2ND</div>
+      <div class="mvp-player">Player Name</div>
+      <div class="mvp-team">Team Name</div>
+      <div class="mvp-stat">00.0</div>
+      <div class="mvp-stat-lbl">STRENGTH RATING</div>
+    </div>
+    <div class="mvp-card-p mvp-p1">
+      <span class="mvp-medal">🥇</span>
+      <div class="mvp-place">1ST</div>
+      <div class="mvp-player">Player Name</div>
+      <div class="mvp-team">Team Name</div>
+      <div class="mvp-stat">00.0</div>
+      <div class="mvp-stat-lbl">STRENGTH RATING</div>
+    </div>
+    <div class="mvp-card-p mvp-p3">
+      <span class="mvp-medal">🥉</span>
+      <div class="mvp-place">3RD</div>
+      <div class="mvp-player">Player Name</div>
+      <div class="mvp-team">Team Name</div>
+      <div class="mvp-stat">00.0</div>
+      <div class="mvp-stat-lbl">STRENGTH RATING</div>
+    </div>
+  </div>
+
+  <!-- TOP PLAYS -->
+  <div class="archive-title" style="margin-top:36px;">🎬 TOP PLAYS OF THE SEASON</div>
+  <div class="clips-grid">
+
+    <!-- ══ HOW TO ADD A CLIP ══════════════════════════════
+         For an MP4 on GitHub:
+           onclick="openClip('https://YOUR-USERNAME.github.io/motion/clip.mp4','Clip Title','3V3 · GRAND FINALS · JAN 2025')"
+
+         For a YouTube video:
+           onclick="openClip('https://www.youtube.com/watch?v=VIDEO_ID','Clip Title','2V2 · SEMIS · JAN 2025')"
+
+         Also update: clip-player name, clip-desc, clip-title, clip-meta
+         And change: class="clip-type-mp4" OR class="clip-type-yt"
+    ════════════════════════════════════════════════════════ -->
+
+    <div class="clip-card" onclick="openClip('PASTE_VIDEO_URL_HERE','Clip Title','FORMAT · ROUND · DATE')">
+      <div class="clip-thumb">
+        <span class="clip-play">▶</span>
+        <span class="clip-type-badge clip-type-mp4">MP4</span>
+        <div class="clip-overlay">
+          <div class="clip-player">Player Name</div>
+          <div class="clip-desc">Tournament Name</div>
+        </div>
+      </div>
+      <div class="clip-info">
+        <div class="clip-title">Clip Title / Description</div>
+        <div class="clip-meta">FORMAT · ROUND · DATE</div>
+      </div>
+    </div>
+
+    <div class="clip-card" onclick="openClip('PASTE_YOUTUBE_URL_HERE','Clip Title','FORMAT · ROUND · DATE')">
+      <div class="clip-thumb">
+        <span class="clip-play">▶</span>
+        <span class="clip-type-badge clip-type-yt">YT</span>
+        <div class="clip-overlay">
+          <div class="clip-player">Player Name</div>
+          <div class="clip-desc">Tournament Name</div>
+        </div>
+      </div>
+      <div class="clip-info">
+        <div class="clip-title">Clip Title / Description</div>
+        <div class="clip-meta">FORMAT · ROUND · DATE</div>
+      </div>
+    </div>
+
+    <div class="clip-card" onclick="openClip('PASTE_VIDEO_URL_HERE','Clip Title','FORMAT · ROUND · DATE')">
+      <div class="clip-thumb">
+        <span class="clip-play">▶</span>
+        <span class="clip-type-badge clip-type-mp4">MP4</span>
+        <div class="clip-overlay">
+          <div class="clip-player">Player Name</div>
+          <div class="clip-desc">Tournament Name</div>
+        </div>
+      </div>
+      <div class="clip-info">
+        <div class="clip-title">Clip Title / Description</div>
+        <div class="clip-meta">FORMAT · ROUND · DATE</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- end season 1 panel -->
+
+<!-- ══ SEASON 2 ════════════════════════════════════════ -->
+<div class="season-panel" id="panel-s2">
+  <div class="empty-season">
+    <span class="es-icon">⏳</span>
+    <div class="es-title">SEASON 2 — COMING SOON</div>
+    <div class="es-sub">Season 2 results will be archived here after the season concludes. Check back after the Grand Finals.</div>
+  </div>
+</div>
+
+<!-- ══ SEASON 3 ════════════════════════════════════════ -->
+<div class="season-panel" id="panel-s3">
+  <div class="empty-season">
+    <span class="es-icon">⏳</span>
+    <div class="es-title">SEASON 3 — COMING SOON</div>
+    <div class="es-sub">Season 3 results will be archived here after the season concludes.</div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="vid-overlay" id="vid-overlay" onclick="closeVidOverlay(event)">
+  <div class="vid-modal">
+    <div class="vid-topbar">
+      <div class="vid-title-wrap">
+        <div class="vid-title" id="vid-title">Clip</div>
+        <div class="vid-meta" id="vid-meta"></div>
+      </div>
+      <button class="vid-close" onclick="closeVid()">✕ CLOSE</button>
+    </div>
+    <div class="vid-player" id="vid-player"></div>
+    <div class="vid-hint" id="vid-hint"></div>
+  </div>
+</div>
+
+<script>
+function showSeason(id, btn) {
+  document.querySelectorAll('.season-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.s-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleTourney(card) {
+  card.classList.toggle('expanded');
+}
+
+// ── VIDEO MODAL ───────────────────────────────────────────
+function getYouTubeID(url) {
+  // Handles youtu.be/ID, youtube.com/watch?v=ID, youtube.com/embed/ID
+  const patterns = [
+    /youtu\.be\/([^?&\s]+)/,
+    /youtube\.com\/watch\?(?:.*&)?v=([^&\s]+)/,
+    /youtube\.com\/embed\/([^?&\s]+)/,
+    /youtube\.com\/shorts\/([^?&\s]+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function isMP4(url) {
+  return url.toLowerCase().includes('.mp4') ||
+         url.toLowerCase().includes('.webm') ||
+         url.toLowerCase().includes('.mov');
+}
+
+function openClip(url, title, meta) {
+  if (!url || url === 'PASTE_VIDEO_URL_HERE') {
+    alert('No video linked yet. Open the file in Notepad and paste a real URL into the onclick attribute of this clip card.');
+    return;
+  }
+
+  const player   = document.getElementById('vid-player');
+  const titleEl  = document.getElementById('vid-title');
+  const metaEl   = document.getElementById('vid-meta');
+  const hintEl   = document.getElementById('vid-hint');
+
+  titleEl.textContent = title || 'Top Play';
+  metaEl.textContent  = meta  || '';
+  player.innerHTML    = '';
+
+  const ytID = getYouTubeID(url);
+
+  if (ytID) {
+    // ── YouTube embed ──────────────────────────────────
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube.com/embed/${ytID}?autoplay=1&rel=0&modestbranding=1`;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    player.appendChild(iframe);
+    hintEl.innerHTML = `YouTube · <a href="${url}" target="_blank">Open on YouTube ↗</a>`;
+
+  } else if (isMP4(url)) {
+    // ── MP4 / direct video ─────────────────────────────
+    const video = document.createElement('video');
+    video.controls = true;
+    video.autoplay = true;
+    video.style.width  = '100%';
+    video.style.height = '100%';
+    const source = document.createElement('source');
+    source.src  = url;
+    source.type = url.toLowerCase().includes('.webm') ? 'video/webm' : 'video/mp4';
+    video.appendChild(source);
+    video.innerHTML += '<p style="color:#3d6080;padding:20px;font-size:13px;">Your browser does not support HTML5 video.</p>';
+    player.appendChild(video);
+    hintEl.innerHTML = `MP4 · <a href="${url}" target="_blank">Open directly ↗</a>`;
+
+  } else {
+    // ── Unknown — open in tab ──────────────────────────
+    window.open(url, '_blank');
+    return;
+  }
+
+  document.getElementById('vid-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVid() {
+  const overlay = document.getElementById('vid-overlay');
+  const player  = document.getElementById('vid-player');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  // Stop video/audio on close
+  setTimeout(() => { player.innerHTML = ''; }, 300);
+}
+
+function closeVidOverlay(e) {
+  if (e.target === document.getElementById('vid-overlay')) closeVid();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVid(); });
+</script>
+</body>
+</html>
